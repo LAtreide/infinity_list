@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lista Atreide — Infinity</title>
+  <style>
+    /* ─── Reset & Base ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #0d0f14;
+      --surface:    #161b26;
+      --border:     #2a3145;
+      --accent:     #c8a84b;
+      --accent2:    #5b9bd5;
+      --text:       #d6dce8;
+      --text-dim:   #7a8499;
+      --tag-bg:     #1e2535;
+      --tag-hover:  #2d3a55;
+      --red:        #c0392b;
+      --green:      #27ae60;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ─── Header ───────────────────────────────────────────────────── */
+    header {
+      background: linear-gradient(135deg, #0d0f14 0%, #1a2035 100%);
+      border-bottom: 2px solid var(--accent);
+      padding: 1.5rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    header .logo {
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+
+    header .subtitle {
+      color: var(--text-dim);
+      font-size: 0.85rem;
+    }
+
+    header .points {
+      margin-left: auto;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    /* ─── Main layout ──────────────────────────────────────────────── */
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    /* ─── Group header ─────────────────────────────────────────────── */
+    .group-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 2.5rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .group-header h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent2);
+    }
+
+    .order-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: var(--tag-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.1rem 0.5rem;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    .order-badge .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent2);
+      display: inline-block;
+    }
+
+    /* ─── Unit Grid ────────────────────────────────────────────────── */
+    .unit-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1rem;
+    }
+
+    /* ─── Unit Card ────────────────────────────────────────────────── */
+    .unit-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .unit-card:hover {
+      border-color: var(--accent);
+    }
+
+    /* Card top stripe by troop type */
+    .unit-card.troop-IL  { border-top: 3px solid #7a8499; }
+    .unit-card.troop-IM  { border-top: 3px solid #5b9bd5; }
+    .unit-card.troop-IP  { border-top: 3px solid var(--accent); }
+    .unit-card.troop-BAT { border-top: 3px solid #9b59b6; }
+    .unit-card.troop-WB  { border-top: 3px solid var(--red); }
+
+    .card-header {
+      padding: 0.75rem 1rem 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .unit-name {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      display: inline-block;
+    }
+
+    .unit-name:hover {
+      text-decoration: underline;
+      opacity: 0.85;
+    }
+
+    /* ─── Miniature image modal ────────────────────────────────────── */
+    #modal-img-wrap {
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    #modal-img-wrap img {
+      max-width: 100%;
+      max-height: 420px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      object-fit: contain;
+      background: #0d0f14;
+    }
+
+    #modal-img-wrap .img-missing {
+      padding: 3rem 1rem;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      border: 1px dashed var(--border);
+      border-radius: 6px;
+    }
+
+    .unit-role {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      margin-top: 0.15rem;
+    }
+
+    .troop-type-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      background: var(--tag-bg);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      white-space: nowrap;
+    }
+
+    /* ─── Stats Row ────────────────────────────────────────────────── */
+    .stats-row {
+      display: flex;
+      gap: 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .stat {
+      flex: 1;
+      text-align: center;
+      padding: 0.35rem 0.2rem;
+      border-right: 1px solid var(--border);
+    }
+
+    .stat:last-child { border-right: none; }
+
+    .stat-label {
+      font-size: 0.6rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      display: block;
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+
+    .stat-label:hover { color: var(--accent); }
+
+    .stat-value {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .stat.highlight .stat-value { color: var(--accent2); }
+
+    /* ─── Weapons ──────────────────────────────────────────────────── */
+    .card-section {
+      padding: 0.6rem 1rem;
+    }
+
+    .section-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+      margin-bottom: 0.3rem;
+    }
+
+    .weapons-list {
+      font-size: 0.8rem;
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .weapon-tag {
+      display: inline-block;
+      background: #1a2535;
+      border: 1px solid #2d3a55;
+      border-radius: 3px;
+      padding: 0 0.35rem;
+      margin: 0.1rem 0.1rem 0.1rem 0;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .weapon-tag:hover {
+      background: #253550;
+      border-color: var(--accent2);
+      color: var(--accent2);
+    }
+
+    /* ─── Equipment ────────────────────────────────────────────────── */
+    .equip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+    }
+
+    .equip-tag {
+      font-size: 0.72rem;
+      background: #1e2a1e;
+      border: 1px solid #2d4530;
+      border-radius: 3px;
+      padding: 0.1rem 0.4rem;
+      color: #6dbf7e;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      user-select: none;
+    }
+
+    .equip-tag:hover {
+      background: #243524;
+      border-color: #6dbf7e;
+    }
+
+    /* ─── Skills ───────────────────────────────────────────────────── */
+    .skills-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+    }
+
+    .skill-tag {
+      font-size: 0.72rem;
+      background: var(--tag-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.15rem 0.5rem;
+      cursor: pointer;
+      color: var(--text);
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+      user-select: none;
+    }
+
+    .skill-tag:hover {
+      background: var(--tag-hover);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ─── Wound tracker ────────────────────────────────────────────── */
+    .vita-tracker {
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+      margin-top: 0.4rem;
+    }
+
+    .vita-box {
+      width: 22px; height: 22px;
+      border: 2px solid var(--accent);
+      border-radius: 3px;
+      cursor: pointer;
+      background: transparent;
+      transition: background 0.15s;
+    }
+
+    .vita-box.used { background: var(--accent); }
+    .vita-box.dead { background: var(--red); border-color: var(--red); }
+
+    .vita-label {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+    }
+
+    /* Status badges */
+    .status-row {
+      display: flex;
+      gap: 0.3rem;
+      flex-wrap: wrap;
+      margin-top: 0.4rem;
+    }
+
+    .status-badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.1rem 0.45rem;
+      border-radius: 3px;
+      border: 1px solid;
+    }
+
+    .status-badge.active   { background: #1a3a1a; border-color: var(--green);  color: var(--green);  }
+    .status-badge.inactive { background: #2a1a1a; border-color: var(--red);    color: var(--red);    }
+    .status-badge.hidden   { background: #1a1a2a; border-color: var(--accent2); color: var(--accent2); }
+
+    /* ─── Modal overlay ────────────────────────────────────────────── */
+    #modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #modal-overlay.open { display: flex; }
+
+    #modal {
+      background: var(--surface);
+      border: 1px solid var(--accent);
+      border-radius: 10px;
+      max-width: 480px;
+      width: 90%;
+      padding: 1.5rem;
+      position: relative;
+      animation: fadeIn 0.15s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    #modal-close {
+      position: absolute;
+      top: 0.75rem; right: 1rem;
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-size: 1.3rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    #modal-close:hover { color: var(--accent); }
+
+    #modal-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+      padding-right: 1.5rem;
+    }
+
+    #modal-body {
+      font-size: 0.85rem;
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    #modal-body .meta {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      margin-bottom: 0.5rem;
+    }
+
+    /* ─── Weapon modal ─────────────────────────────────────────────── */
+    .weapon-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .weapon-stat { text-align: center; }
+    .weapon-stat-label { font-size: 0.65rem; color: var(--text-dim); display: block; }
+    .weapon-stat-val   { font-size: 0.9rem; font-weight: 700; color: var(--accent2); }
+
+    /* ─── Propiedad tags ────────────────────────────────────────────── */
+    .prop-tag {
+      display: inline-block;
+      background: #1e1a35;
+      border: 1px solid #3d3060;
+      border-radius: 3px;
+      padding: 0.1rem 0.4rem;
+      margin: 0.1rem 0.05rem;
+      cursor: pointer;
+      color: #b89de8;
+      font-size: 0.72rem;
+      transition: background 0.15s, border-color 0.15s;
+      user-select: none;
+    }
+    .prop-tag:hover { background: #2d2850; border-color: #b89de8; }
+
+    /* ─── Munición tags ─────────────────────────────────────────────── */
+    .mun-tag {
+      display: inline-block;
+      background: #2a1a20;
+      border: 1px solid #5a2535;
+      border-radius: 3px;
+      padding: 0.1rem 0.4rem;
+      margin: 0.05rem;
+      cursor: pointer;
+      color: #e89daa;
+      font-size: 0.75rem;
+      font-weight: 700;
+      transition: background 0.15s, border-color 0.15s;
+      user-select: none;
+    }
+    .mun-tag:hover { background: #3a1a25; border-color: #e89daa; }
+
+    /* ─── Weapon table page ────────────────────────────────────────── */
+    #weapons-section {
+      margin-top: 3rem;
+    }
+
+    #weapons-section h2 {
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent2);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .weapon-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+    }
+
+    .weapon-table th {
+      background: var(--tag-bg);
+      color: var(--text-dim);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.65rem;
+      letter-spacing: 0.06em;
+      padding: 0.5rem 0.6rem;
+      text-align: left;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .weapon-table td {
+      padding: 0.45rem 0.6rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    .weapon-table tr:hover td { background: var(--tag-bg); }
+
+    .weapon-table td:first-child { font-weight: 600; color: var(--text); }
+
+    /* ─── Footer ───────────────────────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      color: var(--text-dim);
+      font-size: 0.75rem;
+      border-top: 1px solid var(--border);
+      margin-top: 3rem;
+    }
+
+    /* ─── Responsive ───────────────────────────────────────────────── */
+    @media (max-width: 700px) {
+      /* Header compacto */
+      header { padding: 0.75rem 1rem; gap: 0.4rem; }
+      header .logo { font-size: 1.4rem; }
+      header .subtitle { font-size: 0.75rem; }
+      header .points { margin-left: auto; font-size: 1rem; }
+
+      /* Layout */
+      main { padding: 1rem 0.75rem 4rem; }
+      .unit-grid { grid-template-columns: 1fr; }
+      .group-header { flex-wrap: wrap; gap: 0.4rem; }
+
+      /* Stats: etiquetas más legibles */
+      .stat-label { font-size: 0.68rem; }
+      .stat-value { font-size: 0.9rem; }
+      .stat       { padding: 0.4rem 0.1rem; }
+
+      /* Tags: área táctil más grande para dedos */
+      .skill-tag, .equip-tag {
+        font-size: 0.8rem;
+        padding: 0.35rem 0.6rem;
+        margin: 0.15rem 0.1rem;
+      }
+      .weapon-tag {
+        font-size: 0.82rem;
+        padding: 0.25rem 0.45rem;
+        margin: 0.15rem 0.1rem 0.15rem 0;
+      }
+
+      /* Modal: scroll si el contenido es largo */
+      #modal {
+        max-height: 88vh;
+        display: flex;
+        flex-direction: column;
+        padding: 1.2rem;
+      }
+      #modal-body {
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        flex: 1;
+        font-size: 0.9rem;
+        padding-right: 0.25rem;
+      }
+      #modal-title { font-size: 0.95rem; }
+      #modal-close { font-size: 1.5rem; padding: 0.25rem 0.5rem; top: 0.5rem; right: 0.5rem; }
+
+      /* Tabla de armamento: fuente más pequeña, celdas más ajustadas */
+      .weapon-table { font-size: 0.7rem; }
+      .weapon-table th, .weapon-table td { padding: 0.4rem 0.4rem; }
+
+      /* Orden badges en grupos */
+      .order-badge { font-size: 0.7rem; }
+
+      /* Vita boxes más grandes para tocar */
+      .vita-box { width: 28px; height: 28px; }
+
+      /* Prop y mun tags más fáciles de pulsar */
+      .prop-tag, .mun-tag {
+        font-size: 0.78rem;
+        padding: 0.3rem 0.5rem;
+        margin: 0.15rem 0.05rem;
+      }
+
+      /* Section cards más compactas */
+      .card-section { padding: 0.5rem 0.75rem; }
+      .card-header { padding: 0.6rem 0.75rem 0.4rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     HEADER
+════════════════════════════════════════════════════════════════════ -->
+<header>
+  <div>
+    <div class="logo">Lista Atreide</div>
+    <div class="subtitle">Shindenbutai · Pin: B1341-PAtreide</div>
+  </div>
+  <div class="points">300 / 3 SWC</div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     MAIN
+════════════════════════════════════════════════════════════════════ -->
+<main>
+
+  <!-- ── GRUPO 1 ────────────────────────────────────────────────── -->
+  <div class="group-header">
+    <h2>Grupo 1</h2>
+    <span class="order-badge"><span class="dot"></span>9 órdenes regulares</span>
+    <span class="order-badge" style="--dot-color:#c8a84b;"><span class="dot" style="background:var(--accent)"></span>1 orden de teniente</span>
+    <span class="order-badge"><span class="dot" style="background:#7a8499"></span>1 irregular</span>
+  </div>
+
+  <div class="unit-grid" id="group1-grid"></div>
+
+  <!-- ── GRUPO 2 ────────────────────────────────────────────────── -->
+  <div class="group-header" style="margin-top:2.5rem">
+    <h2>Grupo 2</h2>
+    <span class="order-badge"><span class="dot"></span>3 órdenes regulares</span>
+  </div>
+
+  <div class="unit-grid" id="group2-grid"></div>
+
+  <!-- ── TABLA DE ARMAMENTO ─────────────────────────────────────── -->
+  <section id="weapons-section">
+    <h2>Tabla de Armamento</h2>
+    <div style="overflow-x:auto;">
+      <table class="weapon-table" id="weapon-table"></table>
+    </div>
+  </section>
+
+</main>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     MODAL
+════════════════════════════════════════════════════════════════════ -->
+<div id="modal-overlay">
+  <div id="modal">
+    <button id="modal-close" aria-label="Cerrar">✕</button>
+    <div id="modal-title"></div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<footer>Infinity — Lista Atreide · 25 / 04 / 2026</footer>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     DATA & LOGIC
+════════════════════════════════════════════════════════════════════ -->
+<script>
+// ─── Equipment database ────────────────────────────────────────────────
+// ─── Stats database ────────────────────────────────────────────────────
+const STATS = {
+  "MOV": {
+    nombre: "Movimiento (MOV)",
+    desc: "Indica cuántos centímetros puede moverse la tropa por activación. Se muestra como dos valores (ej. 10-10): el primero es el MOV del primer Short Move y el segundo es del segundo Short Move dentro de la misma Orden. Una Orden de Mover gasta los dos valores en secuencia."
+  },
+  "CC": {
+    nombre: "Combate Cuerpo a Cuerpo (CC)",
+    desc: "Habilidad de combate a corta distancia. Se usa como base para los ataques en Cuerpo a Cuerpo (melee) y también como defensa cuando la tropa es atacada en CC. Valores más altos indican mayor destreza marcial. Una tropa con CC alto es peligrosa en combate directo."
+  },
+  "CD": {
+    nombre: "Combate a Distancia (CD)",
+    desc: "Habilidad de combate con armas de fuego y a distancia. Se usa como base para disparar. Cuanto más alto, mejor la precisión. Todas las tiradas de disparo se hacen sobre este atributo, modificado por distancia, cobertura y otras condiciones."
+  },
+  "FIS": {
+    nombre: "Físico (FIS)",
+    desc: "Representa la resistencia física, agilidad y capacidades atléticas. Se usa para tiradas de Esquivar, superar obstaculos, resistir efectos físicos (como Granadas de Humo lanzadas mediante Ataque CD con FIS) y otras acciones que requieran esfuerzo corporal."
+  },
+  "VOL": {
+    nombre: "Voluntad (VOL)",
+    desc: "Fortaleza mental de la tropa. Se usa en tiradas de Coraje (Guts Rolls) para no retirarse bajo el fuego, y también para resistir efectos psicológicos como el Pulso Flash (aturdimiento). Un VOL alto indica una tropa disciplinada y con frialdad bajo presión."
+  },
+  "BLI": {
+    nombre: "Blindaje (BLI)",
+    desc: "Protección física de la tropa, ya sea por armadura, cobertura o equipamiento defensivo. Cuando recibe un impacto, la tropa hace una tirada de salvación contra este valor: si saca igual o menos, el impacto no causa herida. Cuanto mayor, más difícil de herir. BLI=0 significa sin armadura."
+  },
+  "PB": {
+    nombre: "Protección Biotecnológica (PB)",
+    desc: "Refleja la protección NBQ (Nuclear, Biológica, Química), Nanotecnológica, Electromagnética y contra Hackers de que dispone la Tropa. Se usa como Tirada de Salvación cuando el arma indica 'TS: PB' o 'TS: PB/2' (por ejemplo, munición Viral, ataques E/M, Programas de Hacker). Es un atributo independiente del BLI; se tira contra él en lugar de contra el BLI cuando la regla del arma lo indique."
+  },
+  "VITA": {
+    nombre: "Puntos de Vida (VITA)",
+    desc: "Número de heridas que puede aguantar la tropa antes de ser eliminada. VITA 1 significa que con un impacto sin salvar pasa a Inconsciente. VITA 2 significa que el primero la deja Herida (con penalizadores) y el segundo la deja Inconsciente. Una tropa Inconsciente puede ser rematada o estabilizada por un Sanitario."
+  },
+};
+
+// ─── Equipment database ────────────────────────────────────────────────
+const EQUIPMENT = {
+  "Holomáscara": {
+    tipo: "Equipo Automático · Opcional",
+    desc: "Permite desplegar en estado HoloMáscara al situar la Tropa en la mesa de juego. En juego, permite el uso del estado HoloMáscara. Este estado permite hacerse pasar por otra Tropa u objeto del campo de batalla, engañando al adversario sobre la identidad o posición de la unidad."
+  },
+  "Visor X": {
+    tipo: "Equipo Automático · Obligatorio",
+    desc: "Modifica el valor de los MOD de Distancia del usuario: convierte el -3 en 0 y el -6 en -3, para cualquier Arma CD, Habilidad Especial o Equipo. También se aplica a Habilidades con rangos de Distancia que declare su usuario (por ejemplo: Descubrir o Fuego de Supresión). No afecta al humo ni a la visibilidad; sólo mejora los penalizadores por distancia."
+  },
+  "Nanopantalla": {
+    tipo: "Equipo Automático · Obligatorio",
+    desc: "Genera una densa pantalla de nanobots que proporciona protección frente a Ataques a distancia. EFECTOS cuando el portador es objetivo de un Ataque CD: impone un MOD CD-3 al atacante Y proporciona al portador un MOD TS+3 si debe realizar una Tirada de Salvación. RESTRICCIÓN: no puede emplearse contra Ataques de Comunicaciones."
+  },
+  "Visor Multiespectral N1": {
+    tipo: "Equipo Automático · Obligatorio",
+    desc: "Nivel 1 del Visor Multiespectral. EFECTOS: reduce de -3 a 0 el MOD de Mimetismo (-3) y de Zonas de Baja Visibilidad; reduce de -6 a -3 el MOD de Mimetismo (-6) y de Zonas de Mala Visibilidad; permite trazar LDT a través de Zonas de Visibilidad Nula aplicando un MOD de -6. Las Tropas con este Visor no realizan Tiradas Enfrentadas contra armas con Munición Humo. Se ve afectado por Zonas de Ruido Blanco, la Propiedad Reflectante y la pieza de Equipo Albedo."
+  },
+};
+
+// ─── Skills database ────────────────────────────────────────────────
+const SKILLS = {
+  "Coraje": {
+    tipo: "Habilidad Automática · Opcional",
+    desc: "Permite a su poseedor, si así lo desea, superar automáticamente cualquier Tirada de Agallas. Las Tropas con Coraje no se ven afectadas por la situación de ¡¡¡Retirada!!! (se comportan con normalidad hasta el final de la partida). Sin embargo, Coraje NO evita los efectos de Pérdida de Teniente."
+  },
+  "Artes Marciales N3": {
+    tipo: "Habilidad Especial de CC · Automática · Opcional",
+    desc: "Al declarar un Ataque CC (Turno Activo o Reactivo), aplica los modificadores de la Tabla de Artes Marciales de Nivel 3: MOD Ataque +3 al atributo CC propio · MOD Adversario -3 al atributo del rival en la tirada enfrentada · MOD Ráfaga +1DE (tira un dado extra y descarta uno tras ver todos los resultados). Sólo puede emplearse el nivel indicado en el perfil."
+  },
+  "Artes Marciales N4": {
+    tipo: "Habilidad Especial de CC · Automática · Opcional",
+    desc: "Al declarar un Ataque CC (Turno Activo o Reactivo), aplica los modificadores de la Tabla de Artes Marciales de Nivel 4: MOD Ataque +3 al atributo CC propio · MOD Adversario -3 al atributo del rival en la tirada enfrentada · MOD Ráfaga +1R (una Ráfaga adicional). Sólo puede emplearse el nivel indicado en el perfil. Los MOD se aplican tanto en Turno Activo como en Turno Reactivo."
+  },
+  "Ataque CC (Shock)": {
+    tipo: "Modificador de ataque",
+    desc: "Los ataques CC de esta tropa usan munición Shock. Si el objetivo falla la tirada de salvación de BLI, pasa directamente al estado Muerto (no al estado Herido intermedio)."
+  },
+  "Ataque CD (Shock)": {
+    tipo: "Modificador de ataque",
+    desc: "Los ataques a distancia de esta tropa usan munición Shock. Si el objetivo falla el salvado de BLI, pasa directamente a estado Muerto sin pasar por Herido."
+  },
+  "Ataque Sorpresa (-3)": {
+    tipo: "Habilidad especial",
+    desc: "Cuando ataca por primera vez saliendo del estado Camuflado o Despliegue Oculto, los enemigos sufren -3 a su tirada de FtF en ese primer intercambio. El penalizador desaparece una vez la tropa queda Descubierta."
+  },
+  "Camuflaje": {
+    tipo: "Habilidad Automática · Opcional",
+    desc: "Durante la Fase de Despliegue, permite desplegar en estado Camuflado (como Marcador). En juego, permite entrar en estado Camuflado. Mientras está en estado Camuflado, los enemigos deben superar una Tirada de Descubrir (VOL) antes de poder atacarla directamente. Al declarar una acción agresiva (disparo, ataque CC, hackeo...) queda Descubierta."
+  },
+  "Despliegue Oculto": {
+    tipo: "Regla de despliegue",
+    desc: "Esta tropa NO se coloca en la mesa al inicio de la partida. Permanece fuera del tablero como reserva oculta. El jugador la coloca en cualquier punto válido de su zona de despliegue cuando decide activarla, sorprendiendo al rival."
+  },
+  "Esquivar (+2.5cm)": {
+    tipo: "Movimiento reactivo",
+    desc: "En Orden Reactiva, esta tropa puede declarar Esquivar moviéndose hasta 2.5 cm adicionales a su MOV. Permite salir de líneas de fuego o alejarse de ataques entrantes."
+  },
+  "Esquivar (+3)": {
+    tipo: "Movimiento reactivo",
+    desc: "Esta tropa tiene +3 a su atributo FIS cuando realiza una tirada de Esquivar en Orden Reactiva, aumentando sus posibilidades de evitar disparos o ataques."
+  },
+  "Esquivar (+5cm)": {
+    tipo: "Movimiento reactivo",
+    desc: "En Orden Reactiva, esta tropa puede Esquivar moviéndose hasta 5 cm adicionales a su MOV. Especialmente útil para salir de líneas de fuego o avanzar mientras esquiva."
+  },
+  "Fogueado": {
+    tipo: "Habilidad Automática · Opcional",
+    desc: "En situación de Pérdida de Teniente, el poseedor se mantiene como Regular (opera con normalidad). En situación de ¡¡¡Retirada!!! también se mantiene Regular y no se ve afectado. Además, no puede entrar en estado Aislado (por Munición, Programas de Hacker, reglas de escenario, etc.). La Habilidad Especial Ataque CD (MOD negativo X) no es efectiva contra Tropas con Fogueado."
+  },
+  "Frenesí": {
+    tipo: "Habilidad Automática · Fase de Estados · Obligatoria",
+    desc: "REQUISITO: haber provocado directamente que una Tropa enemiga reciba al menos una Herida, o que entre en estado Muerto. EFECTOS: en la Fase de Estados de ese Turno, Frenesí concede a su poseedor las siguientes Habilidades Especiales de forma permanente durante el resto de la partida: Impetuoso y Cobertura Limitada. Al obtener Impetuoso, cancela automáticamente cualquier estado Marcador en que se encuentre (Camuflaje, Suplantación...) y no podrá volver a entrar en estado Marcador. Nota: Armas Posicionables propias no activan este requisito."
+  },
+  "Guerrero Nato": {
+    tipo: "Habilidad Especial de CC · Automática",
+    desc: "REQUISITO: la Tropa debe ser objetivo de un Ataque CC y declarar Ataque CC a su vez. EFECTO: en la Tirada Enfrentada de CC, Guerrero Nato anula todos los MOD negativos que le impongan sus adversarios (Ataque Sorpresa, Artes Marciales del rival, Arma CC con MOD negativo, etc.). No sufre ninguno de esos negativos al declarar Ataque CC en la tirada enfrentada."
+  },
+  "Infiltración": {
+    tipo: "Habilidad de Despliegue · Despliegue Superior · Opcional",
+    desc: "Durante la Fase de Despliegue, la Tropa puede ser desplegada en cualquier punto de la mitad de la mesa que corresponde a su jugador (más allá de la zona de despliegue propia). Si lo desea, puede desplegar en la mitad de la mesa del adversario superando una Tirada Normal de FIS-3. Esta habilidad NO permite desplegar en el interior de la Zona de Despliegue del Enemigo."
+  },
+  "Inmunidad (Críticos)": {
+    tipo: "Habilidad defensiva",
+    desc: "La Tropa no realiza la Tirada de Salvación adicional que provocan los impactos Críticos. El crítico se resuelve como un impacto normal (una sola TS) sin la tirada extra que normalmente concede el crítico. Esta habilidad no se aplica frente a Ataques de Comunicaciones."
+  },
+  "Inmunidad (Shock)": {
+    tipo: "Habilidad defensiva",
+    desc: "Trata la Munición Shock como Munición Normal (N), ignorando todos sus efectos especiales y MOD. El objetivo no pasa directamente a estado Muerto: sigue el proceso de Heridas normal. Esta habilidad no se aplica frente a Ataques de Comunicaciones."
+  },
+  "Intuición de Combate": {
+    tipo: "Habilidad Automática · Opcional",
+    desc: "El poseedor de Intuición de Combate ignora los MOD negativos que impone Ataque Sorpresa. Además, la Habilidad Especial Sigilo no es efectiva contra Tropas que dispongan de Intuición de Combate (sí les proporcionarán ORA con normalidad)."
+  },
+  "Mimetismo (-3)": {
+    tipo: "Camuflaje activo",
+    desc: "Cualquier enemigo que declare un Ataque CD que requiera LDT o Descubrir contra el poseedor debe aplicar a su atributo un MOD de -3. Este penalizador se acumula con otros MOD (distancia, cobertura, etc.). El MOD por Mimetismo NO se aplica en Ataques CC."
+  },
+  "Mimetismo (-6)": {
+    tipo: "Camuflaje activo (avanzado)",
+    desc: "Cualquier enemigo que declare un Ataque CD que requiera LDT o Descubrir contra el poseedor debe aplicar a su atributo un MOD de -6. Este penalizador se acumula con otros MOD. El MOD por Mimetismo NO se aplica en Ataques CC."
+  },
+  "Minador": {
+    tipo: "Habilidad de despliegue",
+    desc: "Esta tropa puede desplegar Minas (u otras armas Posicionables) durante la Fase de Despliegue, antes de que comience la partida. Las minas quedan en estado Camuflado en el tablero desde el inicio."
+  },
+  "Nº2": {
+    tipo: "Habilidad de mando",
+    desc: "Si el Teniente es neutralizado (Inconsciente o Muerto), esta tropa asume automáticamente el mando. Se evita el estado Mando Perdido y la penalización de órdenes que conlleva en la siguiente ronda."
+  },
+  "Operativo Especialista": {
+    tipo: "Especialista",
+    desc: "Esta tropa puede interactuar con Objetivos de Misión y Consolas que requieran un Especialista: hackear paneles de control, curar civiles, realizar rescates, etc. Cuenta como Especialista para todos los efectos de la misión."
+  },
+  "Sigilo": {
+    tipo: "Habilidad Automática · Opcional",
+    desc: "Permite a su poseedor realizar Movimiento Cauteloso dentro de la Zona de Control o Zona de Hackeo enemiga. Si el poseedor de Sigilo declara Movimiento Cauteloso, Inacción, o una Habilidad Corta con Etiqueta Movimiento, sólo proporcionará ORA a aquellos enemigos que tengan LDT hacia él. Si declara cualquier otra Habilidad, las ORA se realizan de manera habitual. Sigilo no es efectivo contra Tropas con Intuición de Combate."
+  },
+  "Sin Cobertura": {
+    tipo: "Habilidad Automática · Obligatoria",
+    desc: "Esta tropa NO se beneficia de los MOD por Cobertura Parcial (el bono de +3 CD que da la cobertura no le protege). Si además obtuviera Cobertura Limitada por otra regla, se sigue aplicando Sin Cobertura por ser la restricción más severa."
+  },
+  "Sin Incapacidad por Herida": {
+    tipo: "Habilidad Automática · Opcional",
+    desc: "Cuando esta tropa pasa a estado Inconsciente, el jugador puede activar esta Habilidad Especial. Al activarla, se coloca un Token NWI en lugar del Token Inconsciente. La tropa NO entra en estado Nulo y puede seguir actuando como si estuviera en estado Normal. Si la tropa con NWI activo recibe otra Herida, pasa a estado Muerto directamente. Todos los efectos especiales de esta habilidad quedan anulados por Munición Shock (que envía directamente a estado Muerto)."
+  },
+  "Terreno (Total)": {
+    tipo: "Habilidad Automática · Opcional",
+    desc: "Puede mover con normalidad en su Tipo de Terreno sin aplicar ninguna de las restricciones que impone el Terreno al Movimiento. Además, obtiene un Bono de +2,5 cm que se suma al primer valor de su Atributo de MOV cuando declara una Habilidad con etiqueta Movimiento en su tipo de Terreno."
+  },
+  "Trepar Plus": {
+    tipo: "Movimiento",
+    desc: "Esta tropa puede subir y bajar superficies verticales usando su MOV completo, sin coste adicional y sin tirada. En la práctica, puede moverse por cualquier muro o fachada como si fuera terreno llano."
+  },
+  "Tropa Religiosa": {
+    tipo: "Habilidad Automática · Obligatoria",
+    desc: "Supera de manera automática y Obligatoria cualquier Tirada de Agallas: no necesita realizarla. Está obligada a mantener la posición y no puede retroceder ni cubrirse tras sobrevivir a un Ataque. No obstante, si el jugador quiere que retroceda u obtenga cobertura, puede realizar una Tirada de VOL; si la supera, puede aplicar los efectos de fallar la Tirada de Agallas. No se ve afectada por la situación de ¡¡¡Retirada!!!"
+  },
+  "Desp. Avanzado (+20cm)": {
+    tipo: "Regla de despliegue",
+    desc: "Esta tropa puede desplegarse hasta 20 cm más allá del límite de su zona de despliegue, adentrándose en el tablero. Le permite comenzar más cerca del centro o de objetivos estratégicos clave."
+  },
+};
+
+// ─── Weapons database ─────────────────────────────────────────────────────────
+const WEAPONS = [
+  { nombre: "Arco Táctico",                     ps: 8,  r: 1,  mun: "DA",       ts: "BLI",   atr: 2, props: "Antimaterial · Silenciosa (-6)",                          rangos: "0 20 40 60" },
+  { nombre: "Arma CC",                          ps: 8,  r: 1,  mun: "N",        ts: "BLI",   atr: 1, props: "CC",                                                       rangos: "—" },
+  { nombre: "Arma CC DA",                       ps: 8,  r: 1,  mun: "DA",       ts: "BLI",   atr: 2, props: "Antimaterial · CC",                                        rangos: "—" },
+  { nombre: "Arma CC E/M",                      ps: 8,  r: 1,  mun: "N+E/M",    ts: "PB/2",  atr: 2, props: "CC",                                                       rangos: "—" },
+  { nombre: "Arma CC Monofilo",                 ps: 8,  r: 1,  mun: "N",        ts: "BLI=0", atr: 1, props: "CC · Estado: Muerto",                                      rangos: "—" },
+  { nombre: "Arma CC Shock",                    ps: 8,  r: 1,  mun: "Shock",    ts: "BLI",   atr: 1, props: "CC",                                                       rangos: "—" },
+  { nombre: "Arma CC Viral",                    ps: 8,  r: 1,  mun: "N",        ts: "PB",    atr: 1, props: "CC · Bioarma (DA+SHOCK)",                                  rangos: "—" },
+  { nombre: "Chain-colt",                       ps: 7,  r: 1,  mun: "N",        ts: "BLI",   atr: 1, props: "Ataque Intuitivo · Plantilla Directa (Lágrima Pequeña)",   rangos: "0 20 40 60" },
+  { nombre: "Contender",                        ps: 7,  r: 2,  mun: "T2",       ts: "BLI",   atr: 1, props: "Antimaterial",                                             rangos: "0 20 60 80" },
+  { nombre: "CrazyKoala",                       ps: 5,  r: 1,  mun: "Shock",    ts: "BLI",   atr: 1, props: "Desechable (2) · Impulsión · Perimetral · Posicionable",   rangos: "0 20 40 60" },
+  { nombre: "Disco Baller",                     ps: "—", r: 1, mun: "—",        ts: "—",     atr: "—", props: "Ataque Especulativo · Desechable (2) · Doble Disparo · Sin Objetivo", rangos: "—" },
+  { nombre: "Escopeta de Abordaje",             ps: 6,  r: 2,  mun: "AP",       ts: "BLI/2", atr: 1, props: "—",                                                       rangos: "0 20 40 60" },
+  { nombre: "Escopeta Ligera",                  ps: 7,  r: 2,  mun: "N",        ts: "BLI",   atr: 1, props: "—",                                                       rangos: "0 20 40 60" },
+  { nombre: "Fusil Combi",                      ps: 7,  r: 3,  mun: "N",        ts: "BLI",   atr: 1, props: "Fuego de Supresión",                                       rangos: "0 40 80 120" },
+  { nombre: "Fusil de Precisión MULTI (Anti.)", ps: 7,  r: 1,  mun: "DA",       ts: "BLI",   atr: 2, props: "Antimaterial",                                             rangos: "0 20 60 100 120" },
+  { nombre: "Fusil de Precisión MULTI (AP)",    ps: 7,  r: 3,  mun: "AP",       ts: "BLI/2", atr: 1, props: "Fuego de Supresión",                                       rangos: "0 20 60 100 120" },
+  { nombre: "Fusil de Precisión MULTI (Shock)", ps: 7,  r: 3,  mun: "Shock",    ts: "BLI",   atr: 1, props: "Fuego de Supresión",                                       rangos: "0 20 60 100 120" },
+  { nombre: "Fusil MULTI (Antimaterial)",       ps: 7,  r: 1,  mun: "DA",       ts: "BLI",   atr: 2, props: "Antimaterial",                                             rangos: "0 40 80 120" },
+  { nombre: "Fusil MULTI (AP)",                 ps: 7,  r: 3,  mun: "AP",       ts: "BLI/2", atr: 1, props: "Fuego de Supresión",                                       rangos: "0 40 80 120" },
+  { nombre: "Fusil MULTI (Shock)",              ps: 7,  r: 3,  mun: "Shock",    ts: "BLI",   atr: 1, props: "Fuego de Supresión",                                       rangos: "0 40 80 120" },
+  { nombre: "Granadas de Humo",                 ps: "—", r: 1, mun: "Humo",     ts: "—",     atr: "—", props: "Ataque Especulativo · Arma CD (FIS) · Plantilla Terminal (Circular) · No Letal · Sin Objetivo", rangos: "0 20 40" },
+  { nombre: "Lanzamisiles (Expansivo)",         ps: 6,  r: 1,  mun: "Exp",      ts: "BLI",   atr: 3, props: "Antimaterial · Plantilla Terminal (Circular)",             rangos: "0 20 60 100 240" },
+  { nombre: "Lanzamisiles (Impacto)",           ps: 6,  r: 1,  mun: "AP+Exp",   ts: "BLI/2", atr: 3, props: "Antimaterial",                                             rangos: "0 20 60 100 240" },
+  { nombre: "MediKit",                          ps: "—", r: 1, mun: "—",        ts: "—",     atr: "—", props: "No Letal",                                               rangos: "0 20 40 60" },
+  { nombre: "Minas Shock",                      ps: 7,  r: 1,  mun: "Shock",    ts: "BLI",   atr: 1, props: "Ataque Intuitivo · Camuflado · Desechable (3) · Plantilla Directa (Lágrima Pequeña) · Posicionable", rangos: "0 20 40 60" },
+  { nombre: "Nanopulser",                       ps: 7,  r: 1,  mun: "N",        ts: "PB",    atr: 1, props: "Plantilla Directa (Lágrima Pequeña) · Ataque Intuitivo",   rangos: "0 20 40 60" },
+  { nombre: "Pistola",                          ps: 9,  r: 2,  mun: "N",        ts: "BLI",   atr: 1, props: "—",                                                       rangos: "0 20 40 60" },
+  { nombre: "Pistola Breaker",                  ps: 8,  r: 2,  mun: "AP",       ts: "PB/2",  atr: 1, props: "—",                                                       rangos: "0 20 40 60" },
+  { nombre: "Pistola Pesada",                   ps: 6,  r: 2,  mun: "Shock",    ts: "BLI",   atr: 1, props: "—",                                                       rangos: "0 20 40 60" },
+  { nombre: "Pistola Silenciada",               ps: 8,  r: 2,  mun: "AP+Shock", ts: "PB/2",  atr: 1, props: "Silenciosa (-6)",                                          rangos: "0 20 40 60" },
+  { nombre: "Pitcher",                          ps: "—", r: 1, mun: "—",        ts: "—",     atr: "—", props: "Ataque Especulativo · Desechable (2) · Indiscriminado · No Letal · Sin Objetivo", rangos: "0 40 60 120" },
+  { nombre: "Pulso Flash",                      ps: 7,  r: 1,  mun: "Aturdidora", ts: "PB",  atr: 1, props: "Arma CD (VOL) · Estado: Aturdido · No Letal",              rangos: "0 20 60 120 240" },
+  { nombre: "Red Fury",                         ps: 7,  r: 4,  mun: "Shock",    ts: "BLI",   atr: 1, props: "Fuego de Supresión",                                       rangos: "0 20 60 100 120" },
+  { nombre: "Subfusil",                         ps: 7,  r: 3,  mun: "N",        ts: "BLI",   atr: 1, props: "Fuego de Supresión",                                       rangos: "0 20 40 80 120" },
+  { nombre: "Thunderbolt",                      ps: 6,  r: 2,  mun: "N",        ts: "BLI",   atr: 1, props: "—",                                                       rangos: "0 20 40 80" },
+];
+
+// ─── Properties database ─────────────────────────────────────────────────────
+const PROPERTIES = {
+  "Antimaterial": {
+    tipo: "Propiedad de arma",
+    desc: "Esta arma carga un tipo de Munición que permite afectar a Estructuras y Elementos de Escenografía (edificios, vehículos inactivos, etc.) además de a Tropas."
+  },
+  "Ataque Especulativo": {
+    tipo: "Propiedad de arma · Habilidad Larga",
+    desc: "Permite realizar un único Ataque CD contra un objetivo fuera de LDT (sin necesidad de verlo). La Ráfaga siempre es 1 independientemente del valor real del arma. Se debe poder trazar una trayectoria hasta el punto de impacto. Si el arma también tiene Plantilla Terminal Circular, el centro de la Plantilla no necesita situarse sobre el centro de la Tropa objetivo."
+  },
+  "Ataque Intuitivo": {
+    tipo: "Propiedad de arma · Habilidad Larga",
+    desc: "Permite realizar Ataques CD contra Marcadores (Camuflados, Suplantados...) o a través de Zonas de Visibilidad Nula, sin tener LDT con el objetivo. El objetivo debe estar dentro de la Zona de Control del atacante."
+  },
+  "Arma CD (FIS)": {
+    tipo: "Propiedad de arma",
+    desc: "Esta arma se utiliza como Arma CD empleando el Atributo FIS en vez de CD. Se aplican al Atributo FIS todos los MOD referidos al Combate a Distancia o al Atributo CD."
+  },
+  "Arma CD (VOL)": {
+    tipo: "Propiedad de arma",
+    desc: "Esta arma se utiliza como Arma CD empleando el Atributo VOL en vez de CD. Se aplican al Atributo VOL todos los MOD referidos al Combate a Distancia, excepto la Habilidad Ataque CD (Shock)."
+  },
+  "Bioarma": {
+    tipo: "Propiedad de arma",
+    desc: "Esta arma aplica la combinación de Munición Especial DA+Shock únicamente sobre objetivos que posean el Atributo Vitalidad (VITA): el objetivo realiza dos Tiradas de Salvación por impacto; fallar cualquiera causa 1 Herida; si la Herida provoca un estado, éste es Muerto directamente."
+  },
+  "BLI=0": {
+    tipo: "Propiedad de arma",
+    desc: "Esta arma reduce el Atributo BLI del objetivo a 0 al realizar la Tirada de Salvación. Hace que sea prácticamente imposible salvar el impacto sin habilidades especiales."
+  },
+  "Camuflado": {
+    tipo: "Propiedad de arma",
+    desc: "Esta arma o pieza de Equipo se despliega aplicando los efectos de la Habilidad Especial Camuflaje. Los Marcadores de Camuflado que ocultan un arma tienen un valor de Silueta (S) de 2."
+  },
+  "CC": {
+    tipo: "Propiedad de arma",
+    desc: "Esta arma permite realizar Ataques CC (Cuerpo a Cuerpo). Sólo puede usarse en combate cuerpo a cuerpo: el usuario debe estar en contacto de Silueta con el objetivo."
+  },
+  "Desechable": {
+    tipo: "Propiedad de arma",
+    desc: "Esta arma tiene usos limitados (el número entre paréntesis indica cuántos). Cada vez que se declara su uso se consume uno, incluso si se falla o pierde la tirada. Al agotar todos los usos, la Tropa pasa a estado Descargado. Cada +1 a Ráfaga por MOD también consume un uso adicional."
+  },
+  "Doble Disparo": {
+    tipo: "Propiedad de arma",
+    desc: "En Turno Activo, esta arma puede aplicar un MOD de +1 a su valor de Ráfaga. Si además tiene Desechable (2), solo puede aplicarse si no se ha consumido ningún uso, y se debe situar un Token Descargado al final de la Orden."
+  },
+  "Estado: Aturdido": {
+    tipo: "Propiedad de arma",
+    desc: "Al fallar la Tirada de Salvación, el objetivo entra en estado Aturdido: su primer valor de MOV se reduce a la mitad, y aplica un MOD de -3 a CD y CC hasta la siguiente Fase de Estados."
+  },
+  "Estado: Muerto": {
+    tipo: "Propiedad de arma",
+    desc: "Esta arma o Propiedad causa directamente el estado Muerto al objetivo si falla la Tirada de Salvación, sin pasar por el estado Inconsciente. Anula habilidades como Sin Incapacidad por Herida."
+  },
+  "Fuego de Supresión": {
+    tipo: "Propiedad de arma · Habilidad Larga",
+    desc: "Permite a la Tropa pasar a estado de Fuego de Supresión (FS) con el arma seleccionada. En estado FS, la tropa dispara automáticamente con Ráfaga 1 a cualquier enemigo que active una Orden dentro de su arco de fuego y rango, en tirada enfrentada. El FS se cancela al inicio del siguiente Turno Activo propio o al recibir una Herida."
+  },
+  "Impulsión": {
+    tipo: "Propiedad de arma perimetral",
+    desc: "El arma Perimetral se mueve automáticamente hasta contacto de Silueta con cualquier Miniatura enemiga que declare o ejecute una Orden u ORA en su Zona de Control (ZC), detonando al llegar. Solo puede evitarse superando una Tirada Normal de Esquivar. No se activa por Marcadores de Camuflaje ni Suplantación."
+  },
+  "Indiscriminado": {
+    tipo: "Propiedad de arma",
+    desc: "Esta arma puede afectar tanto a Tropas enemigas como a Tropas aliadas. Al declararla, el jugador debe tener en cuenta que sus propias miniaturas en el área de efecto también sufrirán el Ataque."
+  },
+  "No Letal": {
+    tipo: "Propiedad de arma",
+    desc: "Esta arma no puede causar Heridas letales. Sus efectos pueden incapacitar, aturdir o marcar al objetivo, pero no enviarlo directamente a estado Muerto ni Inconsciente mediante daño normal."
+  },
+  "Perimetral": {
+    tipo: "Propiedad de arma",
+    desc: "Sistema de defensa automatizado que actúa de forma autónoma una vez colocado en el campo de batalla. Su colocación sigue las reglas de Situar Posicionable. No puede ser designado como objetivo de Habilidades enemigas directamente."
+  },
+  "Plantilla Directa": {
+    tipo: "Propiedad de arma · Plantilla Lágrima",
+    desc: "Esta arma usa una Plantilla de Lágrima (Pequeña o Grande) orientada desde el arma del atacante. No requiere Tirada Enfrentada: el atacante lanza dados; las miniaturas bajo la Plantilla realizan TS. La variante 'Lágrima Pequeña' tiene menor alcance y área que la Grande."
+  },
+  "Plantilla Terminal": {
+    tipo: "Propiedad de arma · Plantilla Circular",
+    desc: "Esta arma usa una Plantilla Circular centrada en el punto de impacto declarado (no en el atacante). Todas las miniaturas dentro del área son objetivo del Ataque y realizan sus TS. En Ataque Especulativo, no es necesario centrar la Plantilla sobre el objetivo."
+  },
+  "Posicionable": {
+    tipo: "Propiedad de arma",
+    desc: "Esta arma o pieza de Equipo puede situarse en la mesa mediante la Habilidad Común Situar Posicionable. Una vez colocada, actúa de forma independiente según sus propias reglas. Los Marcadores Posicionados pertenecen al Grupo de Combate de quien los colocó."
+  },
+  "Silenciosa": {
+    tipo: "Propiedad de arma",
+    desc: "Los disparos de esta arma no revelan la posición del tirador mediante ORA. Frente a un Ataque con arma Silenciosa realizado en ZC pero fuera de LDT, el objetivo debe aplicar el MOD indicado entre paréntesis a su Tirada de Esquivar (adicional a otros MOD)."
+  },
+  "Sin Objetivo": {
+    tipo: "Propiedad de arma",
+    desc: "Esta arma puede usarse sin designar una figura enemiga como objetivo (se declara un punto del tablero). Si se supera la Tirada de CD, el efecto ocurre en el punto declarado. En Turno Reactivo es obligatorio disponer de LDT con la Tropa Activa."
+  },
+};
+
+// ─── Munitions database ─────────────────────────────────────────────────────
+const MUNITIONS = {
+  "N": {
+    tipo: "Munición Normal",
+    desc: "Sin efectos especiales. El objetivo realiza una Tirada de Salvación (TS) contra su BLI por cada impacto. Fallar causa 1 Herida. Un Crítico no añade efectos extra (sólo la TS automática)."
+  },
+  "DA": {
+    tipo: "Munición Doble Acción",
+    desc: "El objetivo realiza DOS Tiradas de Salvación contra BLI por cada impacto. Cada TS fallida causa 1 Herida. Aunque falle la primera y caiga Inconsciente, debe realizar igualmente la segunda. Un Crítico obliga a una TS adicional (3 en total)."
+  },
+  "Shock": {
+    tipo: "Munición Shock",
+    desc: "El objetivo realiza 1 TS normal. Si la falla, pasa directamente a estado MUERTO (no a Inconsciente). Anula completamente la Habilidad Sin Incapacidad por Herida. Un Crítico añade una TS adicional. Especialmente peligrosa contra tropas con VITA 1."
+  },
+  "T2": {
+    tipo: "Munición T2",
+    desc: "El objetivo realiza 1 TS normal. Si la falla, recibe 2 Heridas en lugar de 1. Un Crítico añade una TS adicional que, si se falla, solo causa 1 Herida extra."
+  },
+  "AP": {
+    tipo: "Munición Perforante (Armour Piercing)",
+    desc: "El objetivo realiza la TS sobre la MITAD de su BLI (BLI/2, redondear hacia arriba). No cambia el número de TS. Es devastadora contra tropas con BLI alto; menos relevante contra BLI bajo."
+  },
+  "Exp": {
+    tipo: "Munición Explosiva (EXP)",
+    desc: "El objetivo realiza TRES Tiradas de Salvación contra BLI por cada impacto. Cada TS fallida causa 1 Herida. Aunque caiga antes de realizarlas todas, debe completarlas. Un Crítico añade una TS adicional (4 en total)."
+  },
+  "AP+Exp": {
+    tipo: "Munición Combinada AP+EXP",
+    desc: "Combina Perforante y Explosiva: el objetivo realiza tres Tiradas de Salvación pero sobre BLI/2. Extremadamente letal: alto número de TS más BLI reducido a la mitad."
+  },
+  "AP+Shock": {
+    tipo: "Munición Combinada AP+Shock",
+    desc: "Combina Perforante y Shock: 1 TS sobre BLI/2. Si se falla, el objetivo pasa directamente a estado MUERTO. Muy eficaz contra tropas con armadura alta."
+  },
+  "N+E/M": {
+    tipo: "Munición Combinada N+E/M (Electromagnética)",
+    desc: "El objetivo realiza dos TS separadas: una contra BLI (N) y otra contra PB/2 (E/M). La parte E/M puede inmovilizar TAGs, REMs y tropas con equipo electrónico (estado IMM-A o IMM-B). Especialmente útil contra robots y armaduras pesadas."
+  },
+  "Humo": {
+    tipo: "Munición Humo",
+    desc: "No causa Heridas. Al impactar genera una Zona de Visibilidad Nula (plantilla circular) que bloquea completamente la LDT de todos hasta la Fase de Estados. Usada para cubrir movimientos o bloquear disparos enemigos. Puede lanzarse especulativamente (sin LDT)."
+  },
+  "Aturdidora": {
+    tipo: "Munición Aturdidora (Stun)",
+    desc: "No causa Heridas normales. El objetivo realiza 1 TS contra su PB; si la falla, entra en estado ATURDIDO: su primer valor de MOV se reduce a la mitad y aplica -3 a CD y CC hasta la siguiente Fase de Estados. Un Crítico obliga a una TS adicional."
+  },
+};
+
+// ─── Army list data ───────────────────────────────────────────────────────────
+const UNITS = {
+  group1: [
+    {
+      nombre: "SENKU",
+      rol: "T. Línea",
+      tipo: "IL",
+      img: "images/senku.jpg",
+      armas: ["Fusil Combi", "Pistola", "Arma CC"],
+      equipo: [],
+      habilidades: ["Coraje"],
+      mov: "10-10", cc: 15, cd: 11, fis: 10, vol: 12, bli: 0, pb: 3, vita: 1, s: 2,
+    },
+    {
+      nombre: "SENKU",
+      rol: "T. Línea",
+      tipo: "IL",
+      img: "images/senku.jpg",
+      armas: ["Fusil Combi", "Pistola", "Arma CC"],
+      equipo: [],
+      habilidades: ["Coraje"],
+      mov: "10-10", cc: 15, cd: 11, fis: 10, vol: 12, bli: 0, pb: 3, vita: 1, s: 2,
+    },
+    {
+      nombre: "SHURAYUKI",
+      rol: "T. Veterana",
+      tipo: "IM",
+      img: "images/shurayuki.jpg",
+      armas: ["Fusil MULTI (Antimaterial)", "Fusil MULTI (AP)", "Fusil MULTI (Shock)", "Nanopulser", "Pistola", "Arma CC Viral"],
+      equipo: ["Holomáscara", "Visor X"],
+      habilidades: ["Artes Marciales N4", "Ataque CD (Shock)", "Esquivar (+5cm)", "Inmunidad (Shock)", "Sigilo", "Sin Incapacidad por Herida", "Tropa Religiosa"],
+      mov: "10-10", cc: 23, cd: 12, fis: 12, vol: 13, bli: 2, pb: 3, vita: 1, s: 2,
+    },
+    {
+      nombre: "TANUKI",
+      rol: "Hacker, Disp. Hacker — T. Veterana",
+      tipo: "IM",
+      img: "images/tanuki1.jpg",
+      armas: ["Subfusil", "Pitcher", "Disco Baller", "Pistola", "Arma CC"],
+      equipo: [],
+      habilidades: ["Esquivar (+3)", "Fogueado", "Inmunidad (Shock)", "Nº2", "Terreno (Total)"],
+      mov: "10-10", cc: 17, cd: 13, fis: 11, vol: 13, bli: 2, pb: 3, vita: 1, s: 2,
+    },
+    {
+      nombre: "NINJA",
+      rol: "Hacker, Disp. Hacker — T. Ent. Especial",
+      tipo: "BAT",
+      img: "images/ninja_hacker.jpg",
+      armas: ["Subfusil", "Pistola", "Arma CC DA"],
+      equipo: [],
+      habilidades: ["Artes Marciales N3", "Ataque CC (Shock)", "Ataque Sorpresa (-3)", "Camuflaje", "Coraje", "Despliegue Oculto", "Esquivar (+2.5cm)", "Infiltración", "Mimetismo (-6)", "Sigilo", "Terreno (Total)", "Trepar Plus"],
+      mov: "10-10", cc: 23, cd: 11, fis: 12, vol: 13, bli: 1, pb: 0, vita: 1, s: 2,
+    },
+    {
+      nombre: "SENKU",
+      rol: "Sanitario — T. Línea",
+      tipo: "IL",
+      img: "images/senku.jpg",
+      armas: ["Fusil Combi", "MediKit", "Pistola", "Arma CC"],
+      equipo: [],
+      habilidades: ["Coraje"],
+      mov: "10-10", cc: 15, cd: 11, fis: 10, vol: 12, bli: 0, pb: 3, vita: 1, s: 2,
+    },
+    {
+      nombre: "HATAMOTO",
+      rol: "Teniente [+1 Orden] — T. Cuartel General",
+      tipo: "IP",
+      img: "images/hatamoto.jpg",
+      armas: ["Red Fury", "Pistola Pesada", "Arma CC Monofilo", "Arma CC E/M"],
+      equipo: ["Nanopantalla", "Visor X"],
+      habilidades: ["Artes Marciales N4", "Coraje", "Esquivar (+5cm)", "Frenesí", "Guerrero Nato", "Intuición de Combate", "Mimetismo (-3)", "Operativo Especialista", "Sigilo", "Sin Cobertura"],
+      mov: "15-5", cc: 23, cd: 13, fis: 13, vol: 13, bli: 2, pb: 6, vita: 2, s: 2,
+    },
+    {
+      nombre: "JIZAMURAI",
+      rol: "T. Élite",
+      tipo: "IM",
+      img: "images/jizamurai.jpg",
+      armas: ["Escopeta Ligera", "Thunderbolt", "Pistola", "Arma CC DA"],
+      equipo: [],
+      habilidades: ["Artes Marciales N3", "Coraje", "Esquivar (+3)", "Esquivar (+5cm)", "Inmunidad (Shock)", "Intuición de Combate", "Mimetismo (-3)", "Sigilo", "Trepar Plus"],
+      mov: "15-5", cc: 23, cd: 12, fis: 13, vol: 13, bli: 3, pb: 3, vita: 1, s: 2,
+    },
+    {
+      nombre: "TANUKI",
+      rol: "Cadena de Mando — T. Veterana",
+      tipo: "IM",
+      img: "images/tanuki2.jpg",
+      armas: ["Escopeta de Abordaje", "Chain-colt", "Pulso Flash", "Pistola", "Arma CC"],
+      equipo: [],
+      habilidades: ["Esquivar (+3)", "Fogueado", "Inmunidad (Shock)", "Nº2", "Terreno (Total)"],
+      mov: "10-10", cc: 17, cd: 13, fis: 11, vol: 13, bli: 2, pb: 3, vita: 1, s: 2,
+    },
+    {
+      nombre: "YOJIMBO",
+      rol: "Personaje",
+      tipo: "WB",
+      img: "images/yojimbo.jpg",
+      armas: ["Contender", "Nanopulser", "Granadas de Humo", "CrazyKoala", "Pistola", "Arma CC DA"],
+      equipo: [],
+      habilidades: ["Artes Marciales N4", "Coraje", "Esquivar (+2.5cm)", "Inmunidad (Críticos)", "Minador", "Sigilo", "Sin Cobertura", "Sin Incapacidad por Herida"],
+      mov: "15-5", cc: 24, cd: 12, fis: 14, vol: 13, bli: 1, pb: 3, vita: 1, s: 2,
+    },
+  ],
+  group2: [
+    {
+      nombre: "NINJA",
+      rol: "Hacker, Disp. Hacker Asesino — T. Ent. Especial",
+      tipo: "BAT",
+      img: "images/ninja_asesino.jpg",
+      armas: ["Arco Táctico", "Minas Shock", "Pistola", "Arma CC DA"],
+      equipo: [],
+      habilidades: ["Artes Marciales N3", "Ataque CC (Shock)", "Ataque Sorpresa (-3)", "Camuflaje", "Coraje", "Despliegue Oculto", "Esquivar (+2.5cm)", "Infiltración", "Mimetismo (-6)", "Sigilo", "Terreno (Total)", "Trepar Plus"],
+      mov: "10-10", cc: 23, cd: 11, fis: 12, vol: 13, bli: 1, pb: 0, vita: 1, s: 2,
+    },
+    {
+      nombre: "NOKIZARU",
+      rol: "T. Ent. Especial",
+      tipo: "BAT",
+      img: "images/nokizaru.jpg",
+      armas: ["Fusil de Precisión MULTI (Anti.)", "Fusil de Precisión MULTI (AP)", "Fusil de Precisión MULTI (Shock)", "Pistola Silenciada", "Arma CC Shock"],
+      equipo: ["Visor Multiespectral N1"],
+      habilidades: ["Artes Marciales N3", "Coraje", "Desp. Avanzado (+20cm)", "Esquivar (+2.5cm)", "Mimetismo (-3)", "Sigilo", "Terreno (Total)", "Trepar Plus"],
+      mov: "10-10", cc: 23, cd: 12, fis: 12, vol: 13, bli: 0, pb: 6, vita: 1, s: 2,
+    },
+    {
+      nombre: "RAIDEN",
+      rol: "T. Élite",
+      tipo: "IM",
+      img: "images/raiden.jpg",
+      armas: ["Lanzamisiles (Expansivo)", "Lanzamisiles (Impacto)", "Minas Shock", "Pistola Breaker", "Arma CC"],
+      equipo: ["Visor X"],
+      habilidades: ["Ataque Sorpresa (-3)", "Coraje", "Despliegue Oculto", "Inmunidad (Shock)", "Mimetismo (-3)", "Minador"],
+      mov: "10-10", cc: 16, cd: 13, fis: 11, vol: 13, bli: 3, pb: 3, vita: 1, s: 2,
+    },
+  ],
+};
+
+// ─── Render functions ─────────────────────────────────────────────────────────
+function renderUnit(unit, idx) {
+  const troopLabel = { IL: "Inf. Ligera", IM: "Inf. Media", IP: "Inf. Pesada", BAT: "Bat. Salto", WB: "Warbike" };
+
+  const weaponTags = unit.armas.map(w =>
+    `<span class="weapon-tag" data-weapon="${w}">${w}</span>`
+  ).join(" ");
+
+  const equipTags = unit.equipo.length
+    ? `<div class="card-section">
+        <div class="section-label">Equipo</div>
+        <div class="equip-list">${unit.equipo.map(e => `<span class="equip-tag" data-equip="${e}">${e}</span>`).join("")}</div>
+       </div>`
+    : "";
+
+  const skillTags = unit.habilidades.map(s =>
+    `<span class="skill-tag" data-skill="${s}">${s}</span>`
+  ).join("");
+
+  // Vita boxes
+  const vitaBoxes = Array.from({ length: unit.vita }, (_, i) =>
+    `<div class="vita-box" data-unit="${idx}" data-box="${i}" title="Herida ${i + 1}"></div>`
+  ).join("");
+
+  return `
+  <div class="unit-card troop-${unit.tipo}">
+    <div class="card-header">
+      <div>
+        <div class="unit-name" data-img="${unit.img || ''}" data-label="${unit.nombre}" title="Ver miniatura">${unit.nombre}</div>
+        <div class="unit-role">${unit.rol}</div>
+      </div>
+      <span class="troop-type-badge">${unit.tipo} · ${troopLabel[unit.tipo] || unit.tipo}</span>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat"><span class="stat-label" data-stat="MOV">MOV</span><span class="stat-value">${unit.mov}</span></div>
+      <div class="stat highlight"><span class="stat-label" data-stat="CC">CC</span><span class="stat-value">${unit.cc}</span></div>
+      <div class="stat highlight"><span class="stat-label" data-stat="CD">CD</span><span class="stat-value">${unit.cd}</span></div>
+      <div class="stat"><span class="stat-label" data-stat="FIS">FIS</span><span class="stat-value">${unit.fis}</span></div>
+      <div class="stat"><span class="stat-label" data-stat="VOL">VOL</span><span class="stat-value">${unit.vol}</span></div>
+      <div class="stat"><span class="stat-label" data-stat="BLI">BLI</span><span class="stat-value">${unit.bli}</span></div>
+      <div class="stat"><span class="stat-label" data-stat="PB">PB</span><span class="stat-value">${unit.pb}</span></div>
+      <div class="stat"><span class="stat-label" data-stat="VITA">VITA</span><span class="stat-value">${unit.vita}</span></div>
+    </div>
+
+    <div class="card-section">
+      <div class="section-label">Armamento</div>
+      <div class="weapons-list">${weaponTags}</div>
+    </div>
+
+    ${equipTags}
+
+    <div class="card-section">
+      <div class="section-label">Habilidades Especiales</div>
+      <div class="skills-list">${skillTags}</div>
+    </div>
+
+    <div class="card-section">
+      <div class="section-label">Heridas</div>
+      <div class="vita-tracker">
+        ${vitaBoxes}
+        <span class="vita-label">Activo</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ─── Prop/Mun render helpers ──────────────────────────────────────────────────
+function findPropKey(token) {
+  if (PROPERTIES[token]) return token;
+  const base = token.replace(/\s*\(.*\)$/, '').trim();
+  if (PROPERTIES[base]) return base;
+  return null;
+}
+
+function renderPropTags(propsStr) {
+  if (propsStr === "—") return "<span style='color:var(--text-dim)'>—</span>";
+  return propsStr.split(" · ").map(token => {
+    const key = findPropKey(token);
+    if (key) return `<span class="prop-tag" data-prop="${key}">${token}</span>`;
+    return `<span style="color:var(--text-dim)">${token}</span>`;
+  }).join(" <span style='color:var(--text-dim);font-size:0.7em'>·</span> ");
+}
+
+function renderMunTag(mun) {
+  if (mun === "—") return "<span style='color:var(--text-dim)'>—</span>";
+  if (MUNITIONS[mun]) return `<span class="mun-tag" data-mun="${mun}">${mun}</span>`;
+  // combined like DA+Shock — still make it clickable if we have it
+  return `<span style="color:var(--text)">${mun}</span>`;
+}
+
+function renderWeaponTable() {
+  const thead = `<thead><tr>
+    <th>Nombre</th><th>PS</th><th>R</th><th>MUN.</th><th>TS: ATR</th><th>Propiedades</th><th>Rangos</th>
+  </tr></thead>`;
+  const rows = WEAPONS.map(w => `<tr>
+    <td class="weapon-tag" style="cursor:pointer" data-weapon="${w.nombre}">${w.nombre}</td>
+    <td>${w.ps}</td><td>${w.r}</td><td>${renderMunTag(w.mun)}</td><td>${w.ts}</td>
+    <td>${renderPropTags(w.props)}</td><td style="white-space:nowrap;color:var(--text-dim)">${w.rangos}</td>
+  </tr>`).join("");
+  return `${thead}<tbody>${rows}</tbody>`;
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+document.getElementById("group1-grid").innerHTML = UNITS.group1.map((u, i) => renderUnit(u, `g1-${i}`)).join("");
+document.getElementById("group2-grid").innerHTML = UNITS.group2.map((u, i) => renderUnit(u, `g2-${i}`)).join("");
+document.getElementById("weapon-table").innerHTML = renderWeaponTable();
+
+// ─── Modal logic ──────────────────────────────────────────────────────────────
+const overlay   = document.getElementById("modal-overlay");
+const modalTitle = document.getElementById("modal-title");
+const modalBody  = document.getElementById("modal-body");
+
+function openModal(title, bodyHTML) {
+  modalTitle.textContent = title;
+  modalBody.innerHTML = bodyHTML;
+  overlay.classList.add("open");
+}
+
+function closeModal() {
+  overlay.classList.remove("open");
+}
+
+document.getElementById("modal-close").addEventListener("click", closeModal);
+overlay.addEventListener("click", e => { if (e.target === overlay) closeModal(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+
+// Equipment clicks
+document.addEventListener("click", e => {
+  const tag = e.target.closest(".equip-tag");
+  if (!tag) return;
+  const name = tag.dataset.equip;
+  const eq = EQUIPMENT[name];
+  if (eq) {
+    openModal(name, `<div class="meta">${eq.tipo}</div><p>${eq.desc}</p>`);
+  } else {
+    openModal(name, `<p style="color:var(--text-dim)">Descripción pendiente de añadir.</p>`);
+  }
+});
+
+// Stat label clicks
+document.addEventListener("click", e => {
+  const label = e.target.closest(".stat-label");
+  if (!label) return;
+  const key = label.dataset.stat;
+  const st = STATS[key];
+  if (st) {
+    openModal(st.nombre, `<p>${st.desc}</p>`);
+  }
+});
+
+// Unit name → miniature image
+document.addEventListener("click", e => {
+  const nameEl = e.target.closest(".unit-name");
+  if (!nameEl) return;
+  const imgSrc = nameEl.dataset.img;
+  const label  = nameEl.dataset.label;
+  if (!imgSrc) return;
+  const imgHtml = `
+    <div id="modal-img-wrap">
+      <img src="${imgSrc}" alt="${label}"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+      <div class="img-missing" style="display:none">
+        Imagen no encontrada.<br>
+        Guarda el archivo como <code>${imgSrc}</code> junto a este HTML.
+      </div>
+    </div>`;
+  openModal(label, imgHtml);
+});
+
+// Skill clicks
+document.addEventListener("click", e => {
+  const tag = e.target.closest(".skill-tag");
+  if (!tag) return;
+  const name = tag.dataset.skill;
+  const skill = SKILLS[name];
+  if (skill) {
+    openModal(name, `<div class="meta">${skill.tipo}</div><p>${skill.desc}</p>`);
+  } else {
+    openModal(name, `<p style="color:var(--text-dim)">Descripción pendiente de añadir.</p>`);
+  }
+});
+
+// Weapon clicks
+document.addEventListener("click", e => {
+  const tag = e.target.closest(".weapon-tag");
+  if (!tag) return;
+  const name = tag.dataset.weapon;
+  const w = WEAPONS.find(x => x.nombre === name);
+  if (w) {
+    openModal(name, `
+      <div class="meta">Armamento</div>
+      ${w.props !== "—" ? `<div style="margin-bottom:0.6rem;line-height:1.8">${renderPropTags(w.props)}</div>` : `<p style="color:var(--text-dim)">Sin propiedades especiales.</p>`}
+      <div class="weapon-stats-grid">
+        <div class="weapon-stat"><span class="weapon-stat-label">PS (Poder)</span><span class="weapon-stat-val">${w.ps}</span></div>
+        <div class="weapon-stat"><span class="weapon-stat-label">R (Ráfaga)</span><span class="weapon-stat-val">${w.r}</span></div>
+        <div class="weapon-stat"><span class="weapon-stat-label">Munición</span><span class="weapon-stat-val">${renderMunTag(w.mun)}</span></div>
+        <div class="weapon-stat"><span class="weapon-stat-label">TS: Atributo</span><span class="weapon-stat-val">${w.ts}</span></div>
+        ${w.atr !== "—" ? `<div class="weapon-stat" style="grid-column:span 4;border-top:1px solid var(--border);padding-top:0.4rem"><span class="weapon-stat-label">Nº de Salvaciones</span><span class="weapon-stat-val">${w.atr} tirada${w.atr > 1 ? "s" : ""}</span></div>` : ""}
+      </div>
+      <div style="margin-top:0.75rem;font-size:0.75rem;color:var(--text-dim)">Rangos (cm): ${w.rangos}</div>
+    `);
+  }
+});
+
+// Property clicks
+document.addEventListener("click", e => {
+  const tag = e.target.closest(".prop-tag");
+  if (!tag) return;
+  const key = tag.dataset.prop;
+  const p = PROPERTIES[key];
+  if (p) {
+    openModal(key, `<div class="meta">${p.tipo}</div><p>${p.desc}</p>`);
+  }
+});
+
+// Munition clicks
+document.addEventListener("click", e => {
+  const tag = e.target.closest(".mun-tag");
+  if (!tag) return;
+  const key = tag.dataset.mun;
+  const m = MUNITIONS[key];
+  if (m) {
+    openModal(m.tipo, `<div class="meta">Munición</div><p>${m.desc}</p>`);
+  }
+});
+
+// ─── Vita tracker ─────────────────────────────────────────────────────────────
+document.addEventListener("click", e => {
+  const box = e.target.closest(".vita-box");
+  if (!box) return;
+  const tracker = box.parentElement;
+  const boxes   = [...tracker.querySelectorAll(".vita-box")];
+  const label   = tracker.querySelector(".vita-label");
+  const idx     = boxes.indexOf(box);
+
+  // Toggle: click same box again to unmark
+  if (box.classList.contains("dead")) {
+    boxes.forEach(b => b.classList.remove("used", "dead"));
+    label.textContent = "Activo";
+    return;
+  }
+
+  boxes.forEach((b, i) => {
+    b.classList.remove("used", "dead");
+    if (i < idx) b.classList.add("used");
+    if (i === idx) b.classList.add("dead");
+  });
+
+  label.textContent = idx === boxes.length - 1 ? "¡Eliminado!" : `Herido (${idx + 1})`;
+  label.style.color = idx === boxes.length - 1 ? "var(--red)" : "var(--accent)";
+});
+</script>
+</body>
+</html>
